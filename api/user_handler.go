@@ -1,10 +1,9 @@
 package api
 
 import (
-	"context"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/raphaelmb/go-hotel-reservation/db"
+	"github.com/raphaelmb/go-hotel-reservation/types"
 )
 
 type UserHandler struct {
@@ -17,12 +16,32 @@ func NewUserHandler(userStore db.UserStore) *UserHandler {
 	}
 }
 
+func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
+	var params types.CreateUserParams
+	if err := c.BodyParser(&params); err != nil {
+		return err
+	}
+
+	if errors := params.Validate(); len(errors) > 0 {
+		return c.JSON(errors)
+	}
+
+	user, err := types.NewUserFromParams(params)
+	if err != nil {
+		return err
+	}
+
+	insertedUser, err := h.userStore.InsertUser(c.Context(), user)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(insertedUser)
+}
+
 func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
-	var (
-		id  = c.Params("id")
-		ctx = context.Background()
-	)
-	user, err := h.userStore.GetUserByID(ctx, id)
+	id := c.Params("id")
+	user, err := h.userStore.GetUserByID(c.Context(), id)
 	if err != nil {
 		return err
 	}
@@ -31,5 +50,10 @@ func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
 }
 
 func (h *UserHandler) HandleGetUsers(c *fiber.Ctx) error {
-	return nil
+	users, err := h.userStore.GetUsers(c.Context())
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(users)
 }
