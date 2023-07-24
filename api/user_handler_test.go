@@ -54,7 +54,10 @@ func TestCreateUser(t *testing.T) {
 	b, _ := json.Marshal(params)
 	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
 	req.Header.Add("Content-Type", "application/json")
-	resp, _ := app.Test(req)
+	resp, err := app.Test(req)
+	if err != nil {
+		t.Error(err)
+	}
 
 	var user types.User
 	json.NewDecoder(resp.Body).Decode(&user)
