@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 
+	"github.com/raphaelmb/go-hotel-reservation/api"
 	"github.com/raphaelmb/go-hotel-reservation/db"
 	"github.com/raphaelmb/go-hotel-reservation/types"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -35,6 +37,7 @@ func seedUser(isAdmin bool, firstName string, lastName string, email string, pas
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Printf("%s -> %s\n", user.Email, api.CreateTokenFromUser(user))
 }
 
 func seedHotel(name string, location string, rating int) {

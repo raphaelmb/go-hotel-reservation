@@ -49,7 +49,7 @@ func (h *RoomHandler) HandleGetRooms(c *fiber.Ctx) error {
 func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 	var params BookRoomParams
 	if err := c.BodyParser(&params); err != nil {
-		return err
+		return fmt.Errorf("unable to parse request body")
 	}
 
 	if err := params.validate(); err != nil {
