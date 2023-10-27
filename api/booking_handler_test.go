@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/raphaelmb/go-hotel-reservation/api/middleware"
 	"github.com/raphaelmb/go-hotel-reservation/db/fixtures"
 	"github.com/raphaelmb/go-hotel-reservation/types"
 )
@@ -29,8 +28,8 @@ func TestUserGetBookings(t *testing.T) {
 		booking        = fixtures.AddBooking(db.Store, user.ID, room.ID, from, till)
 		bookingHandler = NewBookingHandler(db.Store)
 
-		app   = fiber.New()
-		route = app.Group("/", middleware.JWTAuthentication(db.User))
+		app   = fiber.New(fiber.Config{ErrorHandler: ErrorHandler})
+		route = app.Group("/", JWTAuthentication(db.User))
 	)
 
 	t.Run("user should be able to get booking", func(t *testing.T) {
@@ -90,8 +89,8 @@ func TestAdminGetBookings(t *testing.T) {
 		booking        = fixtures.AddBooking(db.Store, user.ID, room.ID, from, till)
 		bookingHandler = NewBookingHandler(db.Store)
 
-		app   = fiber.New()
-		admin = app.Group("/", middleware.JWTAuthentication(db.User), middleware.AdminAuth)
+		app   = fiber.New(fiber.Config{ErrorHandler: ErrorHandler})
+		admin = app.Group("/", JWTAuthentication(db.User), AdminAuth)
 	)
 
 	t.Run("admin should be able to get bookings", func(t *testing.T) {
@@ -128,8 +127,8 @@ func TestAdminGetBookings(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if resp.StatusCode == http.StatusOK {
-			t.Fatalf("expected a non 200 response but got %d", resp.StatusCode)
+		if resp.StatusCode != http.StatusUnauthorized {
+			t.Fatalf("expected 401 response but got %d", resp.StatusCode)
 		}
 	})
 }
