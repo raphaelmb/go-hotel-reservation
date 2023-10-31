@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/raphaelmb/go-hotel-reservation/types"
 	"go.mongodb.org/mongo-driver/bson"
@@ -43,9 +44,10 @@ func (s *MongoUserStore) Drop(ctx context.Context) error {
 }
 
 func NewMongoUserStore(client *mongo.Client) *MongoUserStore {
+	dbName := os.Getenv(MongoDBNameEnvName)
 	return &MongoUserStore{
 		client: client,
-		coll:   client.Database(DBNAME).Collection(userColl),
+		coll:   client.Database(dbName).Collection(userColl),
 	}
 }
 
